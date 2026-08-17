@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items
@@ -797,11 +798,38 @@ fun AdminControlAppScreen(
     var channelCategory by remember { mutableStateOf("Sports TV") }
     var channelLogoUrl by remember { mutableStateOf("") }
 
+    // Channel (Live TV) Edit Dialog State
+    var editingChannelItem by remember { mutableStateOf<MediaItem?>(null) }
+    var editChannelName by remember { mutableStateOf("") }
+    var editChannelCategory by remember { mutableStateOf("Sports TV") }
+    var editChannelLogoUrl by remember { mutableStateOf("") }
+    var editChannelServers by remember { mutableStateOf<List<StreamServer>>(emptyList()) }
+    var editChannelCategoryDropdownExpanded by remember { mutableStateOf(false) }
+
+    // Playlist Edit Dialog State
+    var editingPlaylistItem by remember { mutableStateOf<PlaylistInfo?>(null) }
+    var editPlaylistTitle by remember { mutableStateOf("") }
+    var editPlaylistUrl by remember { mutableStateOf("") }
+    var editPlaylistLogoUrl by remember { mutableStateOf("") }
+    var editPlaylistDescription by remember { mutableStateOf("") }
+
     // Movie Form State
     var movieTitle by remember { mutableStateOf("") }
     var movieCategory by remember { mutableStateOf("Bangla Movie") }
     var moviePosterUrl by remember { mutableStateOf("") }
     var movieDesc by remember { mutableStateOf("") }
+
+    // Movie & Series Edit Dialog State
+    var editingMovieItem by remember { mutableStateOf<MediaItem?>(null) }
+    var editMovieTitle by remember { mutableStateOf("") }
+    var editMovieCategory by remember { mutableStateOf("Bangla Movie") }
+    var editMoviePosterUrl by remember { mutableStateOf("") }
+    var editMovieDesc by remember { mutableStateOf("") }
+    var editMovieServers by remember { mutableStateOf<List<StreamServer>>(emptyList()) }
+    var editMovieCategoryDropdownExpanded by remember { mutableStateOf(false) }
+
+    val channelCategoryOptions = listOf("Sports TV", "News", "Entertainment", "Bangla", "Indian", "Kids", "Music", "Infotainment", "Religious")
+    val movieCategoryOptions = listOf("Bangla Movie", "Hindi Dubbed", "Hollywood", "South Movie", "Web Series", "Natok", "Animation")
 
     val sportOptions = listOf("Cricket", "Football", "Tennis", "Basketball", "Racing", "Badminton")
     val statusOptions = listOf("● Live Now", "Upcoming", "Finished")
@@ -1979,6 +2007,25 @@ fun AdminControlAppScreen(
                                 Text(item.title, color = Color.White, fontWeight = FontWeight.Bold)
                                 Text("${item.category} • ${item.getAllServers().size} টি সার্ভার", color = Color(0xFF94A3B8), fontSize = 12.sp)
                             }
+                            // Edit Channel Button
+                            Button(
+                                onClick = {
+                                    editingChannelItem = item
+                                    editChannelName = item.title
+                                    editChannelCategory = item.category
+                                    editChannelLogoUrl = item.logoUrl ?: ""
+                                    val curServers = item.getAllServers()
+                                    editChannelServers = if (curServers.isNotEmpty()) curServers else listOf(StreamServer("সার্ভার ১ (Main)", item.streamUrl))
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("এডিট", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Spacer(modifier = Modifier.width(6.dp))
                             IconButton(
                                 onClick = {
                                     itemToDelete = item
@@ -2174,6 +2221,26 @@ fun AdminControlAppScreen(
                                 Text(item.title, color = Color.White, fontWeight = FontWeight.Bold)
                                 Text("${item.category} • ${item.getAllServers().size} টি সার্ভার", color = Color(0xFF94A3B8), fontSize = 12.sp)
                             }
+                            // Edit Movie Button
+                            Button(
+                                onClick = {
+                                    editingMovieItem = item
+                                    editMovieTitle = item.title
+                                    editMovieCategory = item.category
+                                    editMoviePosterUrl = item.logoUrl ?: ""
+                                    editMovieDesc = item.description ?: ""
+                                    val curServers = item.getAllServers()
+                                    editMovieServers = if (curServers.isNotEmpty()) curServers else listOf(StreamServer("সার্ভার ১ (HD)", item.streamUrl))
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("এডিট", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Spacer(modifier = Modifier.width(6.dp))
                             IconButton(
                                 onClick = {
                                     itemToDelete = item
@@ -2423,6 +2490,24 @@ fun AdminControlAppScreen(
                                 Text(playlist.title, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                                 Text(playlist.url, color = Color(0xFF94A3B8), fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
+                            // Edit Playlist Button
+                            Button(
+                                onClick = {
+                                    editingPlaylistItem = playlist
+                                    editPlaylistTitle = playlist.title
+                                    editPlaylistUrl = playlist.url
+                                    editPlaylistLogoUrl = playlist.logoUrl ?: ""
+                                    editPlaylistDescription = playlist.description ?: ""
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB)),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("এডিট", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Spacer(modifier = Modifier.width(6.dp))
                             IconButton(
                                 onClick = {
                                     playlistToDelete = playlist
@@ -3349,6 +3434,758 @@ fun AdminControlAppScreen(
                             Icon(Icons.Rounded.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("ম্যাচ আপডেট করুন", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // =========================================================================
+    // 2. LIVE TV CHANNEL EDIT DIALOG (User: এডমিন প্যানেলে সবগুলো এডিট করার অপশন)
+    // =========================================================================
+    if (editingChannelItem != null) {
+        val target = editingChannelItem!!
+        Dialog(
+            onDismissRequest = { editingChannelItem = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF2563EB).copy(alpha = 0.5f)),
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .fillMaxHeight(0.90f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                color = Color(0xFF2563EB).copy(alpha = 0.2f),
+                                shape = CircleShape,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Rounded.LiveTv, contentDescription = null, tint = Color(0xFF60A5FA), modifier = Modifier.size(20.dp))
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "টিভি চ্যানেল ও সার্ভার এডিট করুন",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = target.title,
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 11.sp,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                        IconButton(onClick = { editingChannelItem = null }) {
+                            Icon(Icons.Rounded.Close, contentDescription = "Close", tint = Color(0xFF94A3B8))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0xFF334155))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Scrollable Edit Form
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Channel Name
+                        item {
+                            OutlinedTextField(
+                                value = editChannelName,
+                                onValueChange = { editChannelName = it },
+                                label = { Text("চ্যানেলের নাম (Channel Name)") },
+                                colors = customFieldColors(),
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        // Category Dropdown
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                OutlinedTextField(
+                                    value = editChannelCategory,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("ক্যাটাগরি (Category)") },
+                                    trailingIcon = {
+                                        IconButton(onClick = { editChannelCategoryDropdownExpanded = !editChannelCategoryDropdownExpanded }) {
+                                            Icon(Icons.Rounded.ArrowDropDown, contentDescription = null, tint = Color.White)
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth().clickable { editChannelCategoryDropdownExpanded = true },
+                                    colors = customFieldColors(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    singleLine = true
+                                )
+                                DropdownMenu(
+                                    expanded = editChannelCategoryDropdownExpanded,
+                                    onDismissRequest = { editChannelCategoryDropdownExpanded = false },
+                                    modifier = Modifier.background(Color(0xFF1E293B))
+                                ) {
+                                    channelCategoryOptions.forEach { opt ->
+                                        DropdownMenuItem(
+                                            text = { Text(opt, color = Color.White) },
+                                            onClick = {
+                                                editChannelCategory = opt
+                                                editChannelCategoryDropdownExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Logo URL
+                        item {
+                            OutlinedTextField(
+                                value = editChannelLogoUrl,
+                                onValueChange = { editChannelLogoUrl = it },
+                                label = { Text("লোগো URL (Logo Image URL)") },
+                                colors = customFieldColors(),
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        // Multi-Servers Section Header
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Rounded.Dns, contentDescription = null, tint = Color(0xFF00E5FF), modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "স্ট্রিমিং সার্ভার ও ব্যাকআপ লিংক (${editChannelServers.size} টি সার্ভার):",
+                                        color = Color(0xFF00E5FF),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+
+                        // Dynamic Server Inputs
+                        itemsIndexed(editChannelServers) { idx, srv ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = srv.name,
+                                    onValueChange = { newName ->
+                                        editChannelServers = editChannelServers.toMutableList().also {
+                                            it[idx] = it[idx].copy(name = newName)
+                                        }
+                                    },
+                                    placeholder = { Text("Server ${idx + 1} Name", color = Color(0xFF64748B), fontSize = 11.sp) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = customFieldColors(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    singleLine = true
+                                )
+                                OutlinedTextField(
+                                    value = srv.url,
+                                    onValueChange = { newUrl ->
+                                        editChannelServers = editChannelServers.toMutableList().also {
+                                            it[idx] = it[idx].copy(url = newUrl)
+                                        }
+                                    },
+                                    placeholder = { Text("Stream URL (.m3u8 / .mpd)", color = Color(0xFF64748B), fontSize = 11.sp) },
+                                    modifier = Modifier.weight(2f),
+                                    colors = customFieldColors(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    singleLine = true
+                                )
+                                if (editChannelServers.size > 1) {
+                                    IconButton(
+                                        onClick = {
+                                            editChannelServers = editChannelServers.toMutableList().also { it.removeAt(idx) }
+                                        },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.DeleteOutline,
+                                            contentDescription = "সার্ভার সরান",
+                                            tint = Color(0xFFEF4444),
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add Server Button
+                        item {
+                            OutlinedButton(
+                                onClick = {
+                                    val nextNum = editChannelServers.size + 1
+                                    editChannelServers = editChannelServers + StreamServer("সার্ভার $nextNum", "")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.5f)),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF00E5FF))
+                            ) {
+                                Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("➕ আরও সার্ভার যোগ করুন (+ Add Server)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0xFF334155))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Dialog Actions
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { editingChannelItem = null },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF475569))
+                        ) {
+                            Text("বাতিল (Cancel)", fontSize = 13.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                val validServers = editChannelServers.mapNotNull {
+                                    if (it.url.isNotBlank()) StreamServer(it.name.ifBlank { "Server" }, it.url.trim()) else null
+                                }
+
+                                if (editChannelName.isNotBlank() && validServers.isNotEmpty()) {
+                                    val updatedChannel = target.copy(
+                                        title = editChannelName.trim(),
+                                        category = editChannelCategory,
+                                        type = MediaType.LIVE_TV,
+                                        streamUrl = validServers.first().url,
+                                        backupUrl = validServers.getOrNull(1)?.url,
+                                        servers = validServers,
+                                        logoUrl = editChannelLogoUrl.trim().takeIf { it.isNotBlank() },
+                                        isLive = true
+                                    )
+
+                                    repository.saveCustomStream(updatedChannel)
+                                    coroutineScope.launch {
+                                        repository.pushToFirebase(updatedChannel)
+                                    }
+                                    onDataChanged()
+                                    editingChannelItem = null
+                                    Toast.makeText(context, "${updatedChannel.title} সফলভাবে আপডেট ও ক্লাউডে সিঙ্ক হয়েছে!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "চ্যানেলের নাম এবং কমপক্ষে একটি কার্যকর সার্ভার স্ট্রিম লিংক দিন", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1.5f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                        ) {
+                            Icon(Icons.Rounded.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("চ্যানেল আপডেট করুন", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // =========================================================================
+    // 3. PLAYLIST EDIT DIALOG (User: এডমিন প্যানেলে প্লেলিস্ট এডিট করার অপশন)
+    // =========================================================================
+    if (editingPlaylistItem != null) {
+        val target = editingPlaylistItem!!
+        Dialog(
+            onDismissRequest = { editingPlaylistItem = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.5f)),
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .wrapContentHeight()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                color = Color(0xFF00E5FF).copy(alpha = 0.2f),
+                                shape = CircleShape,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Rounded.FeaturedPlayList, contentDescription = null, tint = Color(0xFF00E5FF), modifier = Modifier.size(20.dp))
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "প্লেলিস্ট এডিট করুন",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = target.title,
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 11.sp,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                        IconButton(onClick = { editingPlaylistItem = null }) {
+                            Icon(Icons.Rounded.Close, contentDescription = "Close", tint = Color(0xFF94A3B8))
+                        }
+                    }
+
+                    HorizontalDivider(color = Color(0xFF334155))
+
+                    // Playlist Title
+                    OutlinedTextField(
+                        value = editPlaylistTitle,
+                        onValueChange = { editPlaylistTitle = it },
+                        label = { Text("প্লেলিস্টের নাম (Playlist Name)") },
+                        colors = customFieldColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Playlist M3U URL
+                    OutlinedTextField(
+                        value = editPlaylistUrl,
+                        onValueChange = { editPlaylistUrl = it },
+                        label = { Text("প্লেলিস্ট M3U / M3U8 URL") },
+                        colors = customFieldColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Logo / Banner URL
+                    OutlinedTextField(
+                        value = editPlaylistLogoUrl,
+                        onValueChange = { editPlaylistLogoUrl = it },
+                        label = { Text("লোগো / ব্যানার URL (ঐচ্ছিক)") },
+                        colors = customFieldColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Description
+                    OutlinedTextField(
+                        value = editPlaylistDescription,
+                        onValueChange = { editPlaylistDescription = it },
+                        label = { Text("বিবরণ (Short Description)") },
+                        colors = customFieldColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    HorizontalDivider(color = Color(0xFF334155))
+
+                    // Action buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { editingPlaylistItem = null },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF475569))
+                        ) {
+                            Text("বাতিল", fontSize = 13.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                if (editPlaylistTitle.isNotBlank() && editPlaylistUrl.isNotBlank()) {
+                                    val updatedPl = target.copy(
+                                        title = editPlaylistTitle.trim(),
+                                        url = editPlaylistUrl.trim(),
+                                        logoUrl = editPlaylistLogoUrl.trim().takeIf { it.isNotBlank() },
+                                        description = editPlaylistDescription.trim().takeIf { it.isNotBlank() }
+                                    )
+
+                                    repository.saveCustomPlaylist(updatedPl)
+                                    coroutineScope.launch {
+                                        repository.pushPlaylistToFirebase(updatedPl)
+                                    }
+                                    onDataChanged()
+                                    editingPlaylistItem = null
+                                    Toast.makeText(context, "${updatedPl.title} প্লেলিস্ট সফলভাবে আপডেট হয়েছে!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "প্লেলিস্টের নাম এবং M3U URL উভয়ই পূরণ করুন", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1.5f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E5FF), contentColor = Color.Black)
+                        ) {
+                            Icon(Icons.Rounded.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("প্লেলিস্ট সেভ করুন", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // =========================================================================
+    // 4. MOVIE & SERIES EDIT DIALOG (User: এডমিন প্যানেলে সবগুলো অপশন এডিট করার সুবিধা)
+    // =========================================================================
+    if (editingMovieItem != null) {
+        val target = editingMovieItem!!
+        Dialog(
+            onDismissRequest = { editingMovieItem = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.5f)),
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .fillMaxHeight(0.90f)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                color = Color(0xFFF59E0B).copy(alpha = 0.2f),
+                                shape = CircleShape,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Rounded.MovieFilter, contentDescription = null, tint = Color(0xFFFBBF24), modifier = Modifier.size(20.dp))
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "মুভি ও সিরিজ এডিট করুন",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = target.title,
+                                    color = Color(0xFF94A3B8),
+                                    fontSize = 11.sp,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                        IconButton(onClick = { editingMovieItem = null }) {
+                            Icon(Icons.Rounded.Close, contentDescription = "Close", tint = Color(0xFF94A3B8))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0xFF334155))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Scrollable Edit Form
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Movie Title
+                        item {
+                            OutlinedTextField(
+                                value = editMovieTitle,
+                                onValueChange = { editMovieTitle = it },
+                                label = { Text("মুভির নাম / শিরোনাম (Title)") },
+                                colors = customFieldColors(),
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        // Category Dropdown
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                OutlinedTextField(
+                                    value = editMovieCategory,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("ক্যাটাগরি (Category)") },
+                                    trailingIcon = {
+                                        IconButton(onClick = { editMovieCategoryDropdownExpanded = !editMovieCategoryDropdownExpanded }) {
+                                            Icon(Icons.Rounded.ArrowDropDown, contentDescription = null, tint = Color.White)
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth().clickable { editMovieCategoryDropdownExpanded = true },
+                                    colors = customFieldColors(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    singleLine = true
+                                )
+                                DropdownMenu(
+                                    expanded = editMovieCategoryDropdownExpanded,
+                                    onDismissRequest = { editMovieCategoryDropdownExpanded = false },
+                                    modifier = Modifier.background(Color(0xFF1E293B))
+                                ) {
+                                    movieCategoryOptions.forEach { opt ->
+                                        DropdownMenuItem(
+                                            text = { Text(opt, color = Color.White) },
+                                            onClick = {
+                                                editMovieCategory = opt
+                                                editMovieCategoryDropdownExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Poster URL
+                        item {
+                            OutlinedTextField(
+                                value = editMoviePosterUrl,
+                                onValueChange = { editMoviePosterUrl = it },
+                                label = { Text("পোস্টার / থাম্বনেইল URL (Poster URL)") },
+                                colors = customFieldColors(),
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        // Description
+                        item {
+                            OutlinedTextField(
+                                value = editMovieDesc,
+                                onValueChange = { editMovieDesc = it },
+                                label = { Text("মুভির বিবরণ (Description)") },
+                                colors = customFieldColors(),
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = false,
+                                minLines = 2,
+                                maxLines = 4,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        // Multi-Servers Section Header
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Rounded.Dns, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "মুভি স্ট্রিমিং সার্ভার (${editMovieServers.size} টি সার্ভার):",
+                                    color = Color(0xFFF59E0B),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        // Dynamic Server Inputs
+                        itemsIndexed(editMovieServers) { idx, srv ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = srv.name,
+                                    onValueChange = { newName ->
+                                        editMovieServers = editMovieServers.toMutableList().also {
+                                            it[idx] = it[idx].copy(name = newName)
+                                        }
+                                    },
+                                    placeholder = { Text("Server ${idx + 1} Name", color = Color(0xFF64748B), fontSize = 11.sp) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = customFieldColors(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    singleLine = true
+                                )
+                                OutlinedTextField(
+                                    value = srv.url,
+                                    onValueChange = { newUrl ->
+                                        editMovieServers = editMovieServers.toMutableList().also {
+                                            it[idx] = it[idx].copy(url = newUrl)
+                                        }
+                                    },
+                                    placeholder = { Text("Movie Stream URL (mp4 / m3u8)", color = Color(0xFF64748B), fontSize = 11.sp) },
+                                    modifier = Modifier.weight(2f),
+                                    colors = customFieldColors(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    singleLine = true
+                                )
+                                if (editMovieServers.size > 1) {
+                                    IconButton(
+                                        onClick = {
+                                            editMovieServers = editMovieServers.toMutableList().also { it.removeAt(idx) }
+                                        },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.DeleteOutline,
+                                            contentDescription = "সার্ভার সরান",
+                                            tint = Color(0xFFEF4444),
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add Server Button
+                        item {
+                            OutlinedButton(
+                                onClick = {
+                                    val nextNum = editMovieServers.size + 1
+                                    val defaultName = if (nextNum == 2) "সার্ভার ২ (4K)" else "সার্ভার $nextNum"
+                                    editMovieServers = editMovieServers + StreamServer(defaultName, "")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.5f)),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFF59E0B))
+                            ) {
+                                Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("➕ আরও মুভি সার্ভার যোগ করুন (+ Add Server)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0xFF334155))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Dialog Actions
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { editingMovieItem = null },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF475569))
+                        ) {
+                            Text("বাতিল (Cancel)", fontSize = 13.sp)
+                        }
+
+                        Button(
+                            onClick = {
+                                val validServers = editMovieServers.mapNotNull {
+                                    if (it.url.isNotBlank()) StreamServer(it.name.ifBlank { "HD Server" }, it.url.trim()) else null
+                                }
+
+                                if (editMovieTitle.isNotBlank() && validServers.isNotEmpty()) {
+                                    val updatedMovie = target.copy(
+                                        title = editMovieTitle.trim(),
+                                        category = editMovieCategory,
+                                        type = MediaType.MOVIE,
+                                        streamUrl = validServers.first().url,
+                                        backupUrl = validServers.getOrNull(1)?.url,
+                                        servers = validServers,
+                                        logoUrl = editMoviePosterUrl.trim().takeIf { it.isNotBlank() },
+                                        description = editMovieDesc.trim().takeIf { it.isNotBlank() },
+                                        isLive = false
+                                    )
+
+                                    repository.saveCustomStream(updatedMovie)
+                                    coroutineScope.launch {
+                                        repository.pushToFirebase(updatedMovie)
+                                    }
+                                    onDataChanged()
+                                    editingMovieItem = null
+                                    Toast.makeText(context, "${updatedMovie.title} সফলভাবে আপডেট ও ক্লাউডে সিঙ্ক হয়েছে!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "মুভির নাম এবং কমপক্ষে একটি কার্যকর সার্ভার স্ট্রিম লিংক দিন", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1.5f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E0B), contentColor = Color.Black)
+                        ) {
+                            Icon(Icons.Rounded.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("মুভি আপডেট করুন", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
                     }
                 }

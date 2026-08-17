@@ -6,7 +6,8 @@ import android.view.KeyEvent
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
-import androidx.annotation.OptIn
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -28,7 +29,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -37,6 +40,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +61,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
+import com.example.R
 import com.example.model.MediaItem as AppMediaItem
 import com.example.model.StreamServer
 import kotlinx.coroutines.delay
@@ -305,9 +310,20 @@ fun VideoPlayerScreen(
             )
         }
 
+        val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                /* minBufferMs = */ 1500,
+                /* maxBufferMs = */ 6000,
+                /* bufferForPlaybackMs = */ 200,
+                /* bufferForPlaybackAfterRebufferMs = */ 500
+            )
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
+
         ExoPlayer.Builder(context, renderersFactory)
             .setMediaSourceFactory(mediaSourceFactory)
             .setTrackSelector(trackSelector)
+            .setLoadControl(loadControl)
             .setSeekParameters(androidx.media3.exoplayer.SeekParameters.CLOSEST_SYNC)
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(androidx.media3.common.C.WAKE_MODE_NETWORK)
@@ -596,9 +612,9 @@ fun VideoPlayerScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Buffering Indicator
+            // Buffering Indicator with NAFI TV Logo & Bengali Loading text
             if (isBuffering) {
-                FullscreenLoadingOverlay()
+                PlayerBufferingLogoOverlay(mediaTitle = currentMedia.title, isCompact = false)
             }
 
             // Error Overlay
@@ -939,41 +955,9 @@ fun VideoPlayerScreen(
                     }
                 }
 
-                // Buffering Card in Center (Screenshot 4 style)
+                // Buffering Overlay with NAFI TV Logo & Bengali Loading text
                 if (isBuffering) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Card(
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.85f)),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.3f))
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                CircularProgressIndicator(
-                                    color = Color(0xFF00E5FF),
-                                    strokeWidth = 3.dp,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                                Text(
-                                    text = "Connecting...",
-                                    color = Color.White,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Loading stream...",
-                                    color = Color(0xFF94A3B8),
-                                    fontSize = 11.sp
-                                )
-                            }
-                        }
-                    }
+                    PlayerBufferingLogoOverlay(mediaTitle = currentMedia.title, isCompact = true)
                 }
 
                 // Error Overlay
@@ -1386,39 +1370,136 @@ fun VideoPlayerScreen(
 }
 
 // ---------------------------------------------------------------------
-// Fullscreen Overlay Components
+// Fullscreen & Embedded Buffering / Loading Overlay Components
+// (User Requested: কিছু চ্যানেল প্লে হতে সময় নেয় সেই গুলো প্লে হবার আগে আ্যপ লোগো দেখাবেন লোডিং হচ্ছে এই লেখা লোগোর নিচে থাকবে)
 // ---------------------------------------------------------------------
 @Composable
-private fun FullscreenLoadingOverlay() {
+private fun PlayerBufferingLogoOverlay(
+    mediaTitle: String = "",
+    isCompact: Boolean = false
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "player_buffering_anim")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.92f,
+        targetValue = 1.06f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(850, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "logoPulse"
+    )
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 0.95f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(850, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowPulse"
+    )
+
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.72f)),
         contentAlignment = Alignment.Center
     ) {
         Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.85f)),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.3f))
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A).copy(alpha = 0.92f)),
+            border = androidx.compose.foundation.BorderStroke(
+                width = 1.5.dp,
+                brush = Brush.linearGradient(
+                    listOf(
+                        Color(0xFF00E5FF).copy(alpha = glowAlpha),
+                        Color(0xFF3B82F6).copy(alpha = glowAlpha),
+                        Color(0xFFA855F7).copy(alpha = glowAlpha * 0.7f)
+                    )
+                )
+            ),
+            modifier = Modifier.padding(16.dp)
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 28.dp, vertical = 20.dp),
+                modifier = Modifier.padding(
+                    horizontal = if (isCompact) 20.dp else 32.dp,
+                    vertical = if (isCompact) 14.dp else 22.dp
+                ),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(if (isCompact) 8.dp else 12.dp)
             ) {
-                CircularProgressIndicator(
+                // Animated NAFI TV Logo with Glowing Ambient Aura
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(if (isCompact) 56.dp else 76.dp)
+                ) {
+                    // Outer Soft Halo
+                    Box(
+                        modifier = Modifier
+                            .size(if (isCompact) 56.dp else 76.dp)
+                            .scale(pulseScale * 1.12f)
+                            .alpha(glowAlpha * 0.4f)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Color(0xFF00E5FF), Color(0xFF3B82F6), Color.Transparent)
+                                )
+                            )
+                    )
+
+                    // Sharp Logo
+                    Image(
+                        painter = painterResource(id = R.drawable.app_logo),
+                        contentDescription = "NAFI TV Logo",
+                        modifier = Modifier
+                            .size(if (isCompact) 48.dp else 64.dp)
+                            .scale(pulseScale)
+                            .clip(RoundedCornerShape(14.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                // Bengali "লোডিং হচ্ছে..." text (As requested: "লোডিং হচ্ছে এই লেখা লোগোর নিচে থাকবে")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "লোডিং হচ্ছে...",
+                        color = Color.White,
+                        fontSize = if (isCompact) 14.sp else 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+
+                    if (mediaTitle.isNotBlank()) {
+                        Text(
+                            text = mediaTitle,
+                            color = Color(0xFF00E5FF),
+                            fontSize = if (isCompact) 11.sp else 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                // Smooth Glowing Progress Bar
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .width(if (isCompact) 100.dp else 130.dp)
+                        .height(3.dp)
+                        .clip(CircleShape),
                     color = Color(0xFF00E5FF),
-                    strokeWidth = 3.dp,
-                    modifier = Modifier.size(40.dp)
+                    trackColor = Color(0xFF334155)
                 )
+
+                // Subtitle Badge
                 Text(
-                    text = "Connecting...",
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Loading stream...",
+                    text = "NAFI TV 24 • ফাস্ট স্ট্রিমিং",
                     color = Color(0xFF94A3B8),
-                    fontSize = 12.sp
+                    fontSize = if (isCompact) 9.sp else 10.sp,
+                    fontWeight = FontWeight.Normal
                 )
             }
         }
