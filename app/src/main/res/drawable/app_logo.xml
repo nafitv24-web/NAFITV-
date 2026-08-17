@@ -1,0 +1,159 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Dark rounded squircle background -->
+    <path
+        android:pathData="M 96,16 C 42,16 16,42 16,96 L 16,416 C 16,470 42,496 96,496 L 416,496 C 470,496 496,470 496,416 L 496,96 C 496,42 470,16 416,16 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="256"
+                android:startY="16"
+                android:endX="256"
+                android:endY="496">
+                <item android:offset="0.0" android:color="#FF0D1B2A" />
+                <item android:offset="0.5" android:color="#FF111D38" />
+                <item android:offset="1.0" android:color="#FF080C14" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Outer Glow / Ambient Lighting behind Logo -->
+    <path
+        android:pathData="M 256,120 m -110,0 a 110,110 0 1,0 220,0 a 110,110 0 1,0 -220,0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="256"
+                android:centerY="200"
+                android:gradientRadius="130">
+                <item android:offset="0.0" android:color="#408B5CF6" />
+                <item android:offset="0.6" android:color="#2000E5FF" />
+                <item android:offset="1.0" android:color="#00000000" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Top-right broadcast / WiFi signal wave 1 -->
+    <path
+        android:pathData="M 300,140 C 316,126 338,118 360,118 C 374,118 388,122 400,130"
+        android:strokeWidth="12"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="300"
+                android:startY="120"
+                android:endX="400"
+                android:endY="130">
+                <item android:offset="0.0" android:color="#FF00E5FF" />
+                <item android:offset="1.0" android:color="#FF8B5CF6" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Top-right broadcast wave 2 -->
+    <path
+        android:pathData="M 315,165 C 328,154 344,148 362,148 C 373,148 384,151 394,157"
+        android:strokeWidth="11"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="315"
+                android:startY="148"
+                android:endX="394"
+                android:endY="165">
+                <item android:offset="0.0" android:color="#FF00E5FF" />
+                <item android:offset="1.0" android:color="#FFA855F7" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Main dynamic Ribbon Play Loop - Outer Cyan to Blue curve -->
+    <path
+        android:pathData="M 130,172 L 180,135 C 196,123 218,120 236,128 L 330,176 C 362,192 376,228 362,260 C 352,282 330,296 306,298 L 224,310 C 182,316 150,282 152,240 L 154,200 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="130"
+                android:startY="120"
+                android:endX="370"
+                android:endY="310">
+                <item android:offset="0.0" android:color="#FF00E5FF" />
+                <item android:offset="0.3" android:color="#FF3B82F6" />
+                <item android:offset="0.65" android:color="#FF8B5CF6" />
+                <item android:offset="1.0" android:color="#FFEC4899" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Left Arrow Wing / Forward Fin (Cyan / Teal) -->
+    <path
+        android:pathData="M 130,165 L 195,210 L 130,255 L 155,210 Z"
+        android:fillColor="#FF00E5FF" />
+
+    <!-- Overlapping Neon Ribbon Loop (Purple - Orange - Yellow) -->
+    <path
+        android:pathData="M 168,260 C 180,295 215,316 252,312 L 320,290 C 356,278 376,238 360,202 L 340,160 C 330,140 305,130 285,142 C 265,154 260,180 272,200 L 290,230 C 298,245 288,262 272,266 L 220,274 C 200,277 180,270 168,260 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="160"
+                android:startY="280"
+                android:endX="370"
+                android:endY="140">
+                <item android:offset="0.0" android:color="#FFA855F7" />
+                <item android:offset="0.4" android:color="#FFF43F5E" />
+                <item android:offset="0.75" android:color="#FFF97316" />
+                <item android:offset="1.0" android:color="#FFFBBF24" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Center Cutout / White Play Icon Triangle -->
+    <path
+        android:pathData="M 230,175 C 230,166 240,160 248,165 L 298,198 C 305,203 305,213 298,218 L 248,251 C 240,256 230,250 230,241 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- Inner Soft Shadow inside Play Triangle -->
+    <path
+        android:pathData="M 230,175 L 260,208 L 230,241 Z"
+        android:fillColor="#15000000" />
+
+    <!-- "NAFI TV" Bold Branding Text Paths -->
+    <!-- 'N' -->
+    <path
+        android:pathData="M 85,390 L 105,390 L 138,445 L 138,390 L 156,390 L 156,468 L 136,468 L 103,413 L 103,468 L 85,468 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- 'A' -->
+    <path
+        android:pathData="M 195,390 L 217,390 L 248,468 L 227,468 L 220,450 L 192,450 L 185,468 L 165,468 Z M 198,434 L 214,434 L 206,410 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- 'F' -->
+    <path
+        android:pathData="M 258,390 L 302,390 L 302,406 L 276,406 L 276,423 L 298,423 L 298,439 L 276,439 L 276,468 L 258,468 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- 'I' -->
+    <path
+        android:pathData="M 314,390 L 332,390 L 332,468 L 314,468 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- 'T' -->
+    <path
+        android:pathData="M 358,390 L 404,390 L 404,406 L 390,406 L 390,468 L 372,468 L 372,406 L 358,406 Z"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- 'V' -->
+    <path
+        android:pathData="M 408,390 L 428,390 L 444,444 L 460,390 L 480,390 L 454,468 L 434,468 Z"
+        android:fillColor="#FFFFFFFF" />
+
+</vector>

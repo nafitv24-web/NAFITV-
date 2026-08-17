@@ -1,0 +1,8 @@
+{
+  "name": "Remix NAFI TV 24",
+  "description": "লাইভ টিভি, মুভি, ওয়েব সিরিজ এবং স্পোর্টস স্ট্রিমিং অ্যাপ - Live TV, Movies, Web Series \u0026 Sports streaming with built-in HLS/ExoPlayer and external player support",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

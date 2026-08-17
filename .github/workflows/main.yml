@@ -1,0 +1,60 @@
+name: Build & Release NAFI TV 24 APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew || true
+
+      - name: Setup Environment File
+        run: |
+          if [ -f ".env.example" ] && [ ! -f ".env" ]; then
+            cp .env.example .env
+          elif [ ! -f ".env" ]; then
+            touch .env
+          fi
+
+      - name: Restore or Generate Debug Keystore
+        run: |
+          if [ -f "debug.keystore.base64" ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+          fi
+          if [ ! -f "debug.keystore" ]; then
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Build APK with Gradle
+        env:
+          JAVA_OPTS: "-Djava.awt.headless=true -Dfile.encoding=UTF-8"
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=\"-Xmx4g -Djava.awt.headless=true -Dfile.encoding=UTF-8\" -Djava.awt.headless=true"
+        run: |
+          if [ -f "./gradlew" ]; then
+            ./gradlew assembleDebug -Djava.awt.headless=true -Dkotlin.compiler.execution.strategy=daemon --stacktrace
+          else
+            gradle assembleDebug -Djava.awt.headless=true -Dkotlin.compiler.execution.strategy=daemon --stacktrace
+          fi
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NAFI-TV-24-Debug-APK
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
