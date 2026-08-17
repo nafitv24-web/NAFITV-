@@ -55,14 +55,18 @@ data class MediaItem(
         if (servers.isNotEmpty()) {
             list.addAll(servers.filter { it.url.isNotBlank() })
         }
-        if (list.none { it.url == streamUrl } && streamUrl.isNotBlank()) {
-            list.add(0, StreamServer("সার্ভার ১ (Main)", streamUrl))
+        if (streamUrl.isNotBlank() && list.none { it.url.trim().equals(streamUrl.trim(), ignoreCase = true) }) {
+            list.add(0, StreamServer("সার্ভার ১ (Main)", streamUrl.trim()))
         }
-        if (!backupUrl.isNullOrBlank() && list.none { it.url == backupUrl }) {
-            list.add(StreamServer("সার্ভার ২ (Backup)", backupUrl))
+        if (!backupUrl.isNullOrBlank() && 
+            !backupUrl.trim().equals(streamUrl.trim(), ignoreCase = true) && 
+            list.none { it.url.trim().equals(backupUrl.trim(), ignoreCase = true) }
+        ) {
+            list.add(StreamServer("সার্ভার ২ (Backup)", backupUrl.trim()))
         }
-        return list.ifEmpty {
-            if (streamUrl.isNotBlank()) listOf(StreamServer("সার্ভার ১", streamUrl)) else emptyList()
+        val distinctList = list.distinctBy { it.url.trim() }
+        return distinctList.ifEmpty {
+            if (streamUrl.isNotBlank()) listOf(StreamServer("সার্ভার ১ (Main)", streamUrl.trim())) else emptyList()
         }
     }
 }

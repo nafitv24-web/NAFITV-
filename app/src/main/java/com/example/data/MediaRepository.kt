@@ -417,8 +417,7 @@ class MediaRepository(private val context: Context) {
                         type = mediaType,
                         streamUrl = streamUrl,
                         servers = listOf(
-                            StreamServer("সার্ভার ১ (Main)", streamUrl),
-                            StreamServer("সার্ভার ২ (Direct)", streamUrl)
+                            StreamServer("সার্ভার ১ (Main)", streamUrl)
                         ),
                         logoUrl = currentLogo,
                         country = currentCountry,

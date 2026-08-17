@@ -93,6 +93,12 @@ fun VideoPlayerScreen(
     var isPlaying by remember { mutableStateOf(true) }
     var isBuffering by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Immediately trigger buffering state whenever channel or server URL changes
+    LaunchedEffect(currentMedia.id, currentUrl) {
+        isBuffering = true
+        errorMessage = null
+    }
     var showControls by remember { mutableStateOf(true) }
     var isMuted by remember { mutableStateOf(false) }
     var playbackSpeed by remember { mutableFloatStateOf(1.0f) }
@@ -312,10 +318,10 @@ fun VideoPlayerScreen(
 
         val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                /* minBufferMs = */ 1500,
-                /* maxBufferMs = */ 6000,
-                /* bufferForPlaybackMs = */ 200,
-                /* bufferForPlaybackAfterRebufferMs = */ 500
+                /* minBufferMs = */ 2500,
+                /* maxBufferMs = */ 15000,
+                /* bufferForPlaybackMs = */ 250,
+                /* bufferForPlaybackAfterRebufferMs = */ 600
             )
             .setPrioritizeTimeOverSizeThresholds(true)
             .build()
@@ -449,6 +455,7 @@ fun VideoPlayerScreen(
         if (currentIndex != -1 && list.isNotEmpty()) {
             val nextIndex = (currentIndex + delta).mod(list.size)
             val nextItem = list[nextIndex]
+            isBuffering = true
             currentMedia = nextItem
             selectedServerIndex = 0
             val newServers = nextItem.getAllServers()
@@ -726,6 +733,7 @@ fun VideoPlayerScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
+                                            isBuffering = true
                                             currentMedia = item
                                             selectedServerIndex = 0
                                             val newServers = item.getAllServers()
@@ -1246,8 +1254,8 @@ fun VideoPlayerScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Multi-Server Chips
-                if (servers.isNotEmpty()) {
+                // Multi-Server Chips (Only display when the channel actually has more than 1 server available)
+                if (servers.size > 1) {
                     Text(
                         text = "সার্ভার নির্বাচন (${servers.size} টি সার্ভার উপলব্ধ):",
                         color = Color(0xFF94A3B8),
@@ -1269,6 +1277,7 @@ fun VideoPlayerScreen(
                                     if (selectedServerIndex != index) {
                                         selectedServerIndex = index
                                         currentUrl = server.url
+                                        isBuffering = true
                                         errorMessage = null
                                     }
                                 }
@@ -1294,9 +1303,8 @@ fun VideoPlayerScreen(
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(14.dp))
                 }
-
-                Spacer(modifier = Modifier.height(14.dp))
 
                 // Related / Other Channels Grid in Portrait
                 Text(
@@ -1319,6 +1327,7 @@ fun VideoPlayerScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    isBuffering = true
                                     currentMedia = item
                                     selectedServerIndex = 0
                                     val newServers = item.getAllServers()
