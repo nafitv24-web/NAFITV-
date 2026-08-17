@@ -283,298 +283,628 @@ fun NafiTvMainApp() {
             }
         }
 
-        Scaffold(
-            topBar = {
-                // Top Action Bar Header (Dynamic per tab & matching screenshot)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF0F172A))
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Image(
-                                painter = painterResource(id = R.drawable.app_logo),
-                                contentDescription = "NAFI TV Logo",
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(RoundedCornerShape(10.dp)),
-                                contentScale = ContentScale.Fit
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            if (currentTab == AppTab.EVENTS) {
-                                Text(
-                                    text = "Live Events",
-                                    color = Color.White,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            } else {
-                                Column {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = "NAFI TV 24",
-                                            color = Color.White,
-                                            fontSize = 17.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(CircleShape)
-                                                .background(Color(0xFFEF4444))
-                                        )
-                                    }
-                                    Text(
-                                        text = currentTab.englishLabel,
-                                        color = Color(0xFF94A3B8),
-                                        fontSize = 11.sp
-                                    )
-                                }
-                            }
-                        }
-
-                        // Action Quick Controls
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Layout Toggle: Mobile Pill
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = if (!isTvMode) Color(0xFF00E5FF).copy(alpha = 0.2f) else Color(0xFF1E293B),
-                                border = if (!isTvMode) androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)) else null,
-                                modifier = Modifier.clickable {
-                                    if (isTvMode) {
-                                        isTvMode = false
-                                        Toast.makeText(context, "📱 মোবাইল মোড সক্রিয় হয়েছে (Portrait)", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Smartphone,
-                                        contentDescription = "Mobile Mode",
-                                        tint = if (!isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Mobile",
-                                        color = if (!isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-
-                            // Layout Toggle: TV Pill
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = if (isTvMode) Color(0xFF00E5FF).copy(alpha = 0.2f) else Color(0xFF1E293B),
-                                border = if (isTvMode) androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)) else null,
-                                modifier = Modifier.clickable {
-                                    if (!isTvMode) {
-                                        isTvMode = true
-                                        Toast.makeText(context, "📺 টিভি মোড সক্রিয় হয়েছে (Landscape & TV Layout)", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Tv,
-                                        contentDescription = "TV Mode",
-                                        tint = if (isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "TV",
-                                        color = if (isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-
-                            // Refresh Button
-                            Surface(
-                                shape = CircleShape,
-                                color = Color(0xFF1E293B),
-                                modifier = Modifier.clickable { refreshAllData() }
-                            ) {
-                                Box(modifier = Modifier.padding(8.dp)) {
-                                    if (isRefreshing) {
-                                        CircularProgressIndicator(
-                                            color = Color(0xFF00E5FF),
-                                            strokeWidth = 2.dp,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Refresh,
-                                            contentDescription = "Refresh",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            bottomBar = {
-                NavigationBar(
-                    containerColor = Color(0xFF0F172A),
-                    contentColor = Color.White
-                ) {
-                    AppTab.values().forEach { tab ->
-                        val selected = currentTab == tab
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = { currentTab = tab },
-                            icon = {
-                                Icon(
-                                    imageVector = when (tab) {
-                                        AppTab.EVENTS -> Icons.Rounded.EmojiEvents
-                                        AppTab.LIVE_TV -> Icons.Rounded.Tv
-                                        AppTab.MOVIES -> Icons.Rounded.Movie
-                                        AppTab.PLAYLIST -> Icons.Rounded.Folder
-                                        AppTab.MENU -> Icons.Rounded.Menu
-                                    },
-                                    contentDescription = tab.englishLabel,
-                                    tint = if (selected) Color(0xFF00E5FF) else Color(0xFF94A3B8)
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = tab.englishLabel,
-                                    color = if (selected) Color(0xFF00E5FF) else Color(0xFF94A3B8),
-                                    fontSize = 11.sp,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-                                )
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Color(0xFF1E293B)
-                            )
-                        )
-                    }
-                }
-            },
-            containerColor = Color(0xFF020617)
-        ) { paddingValues ->
-            Box(
+        if (isTvMode) {
+            // TV MODE: Sidebar Menu Rail on Left + Content on Right (Matching uploaded screenshot)
+            Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .background(Color(0xFF020617))
             ) {
-                when (currentTab) {
-                    AppTab.EVENTS -> EventsScreen(
-                        sports = sportsList.distinctBy { it.id },
-                        favoriteIds = favoriteIds,
-                        isTvMode = isTvMode,
-                        onSelectMedia = {
-                            selectedMediaItem = it
-                            activePlaybackPlaylist = sportsList.distinctBy { sp -> sp.id }
-                        },
-                        onToggleFavorite = { id ->
-                            repository.toggleFavorite(id)
-                            favoriteIds = repository.getFavoriteIds()
-                        }
-                    )
-
-                    AppTab.LIVE_TV -> LiveTvTabScreen(
-                        channels = (liveTvList + customList.filter { it.type == MediaType.LIVE_TV } + m3uList.filter { it.type == MediaType.LIVE_TV }).distinctBy { it.id },
-                        favoriteIds = favoriteIds,
-                        isTvMode = isTvMode,
-                        onSelectMedia = {
-                            selectedMediaItem = it
-                            activePlaybackPlaylist = (liveTvList + customList.filter { ch -> ch.type == MediaType.LIVE_TV } + m3uList.filter { ch -> ch.type == MediaType.LIVE_TV }).distinctBy { ch -> ch.id }
-                        },
-                        onToggleFavorite = { id ->
-                            repository.toggleFavorite(id)
-                            favoriteIds = repository.getFavoriteIds()
-                        }
-                    )
-
-                    AppTab.MOVIES -> MoviesTabScreen(
-                        movies = (moviesList + customList.filter { it.type == MediaType.MOVIE || it.type == MediaType.SERIES } + m3uList.filter { it.type == MediaType.MOVIE }).distinctBy { it.id },
-                        favoriteIds = favoriteIds,
-                        isTvMode = isTvMode,
-                        onSelectMedia = {
-                            selectedMediaItem = it
-                            activePlaybackPlaylist = (moviesList + customList.filter { mv -> mv.type == MediaType.MOVIE || mv.type == MediaType.SERIES } + m3uList.filter { mv -> mv.type == MediaType.MOVIE }).distinctBy { mv -> mv.id }
-                        },
-                        onToggleFavorite = { id ->
-                            repository.toggleFavorite(id)
-                            favoriteIds = repository.getFavoriteIds()
-                        }
-                    )
-
-                    AppTab.PLAYLIST -> PlaylistTabScreen(
-                        playlists = playlistsList,
-                        repository = repository,
-                        isTvMode = isTvMode,
-                        onSelectMedia = { item, playlist ->
-                            selectedMediaItem = item
-                            activePlaybackPlaylist = playlist
-                        }
-                    )
-
-                    AppTab.MENU -> MenuScreen(
-                        repository = repository,
-                        customList = customList,
-                        onOpenAdminApp = { isAdminViewActive = true },
-                        onCheckForUpdates = { checkForUpdates(isManualCheck = true) },
-                        availableUpdateInfo = availableUpdateInfo,
-                        onPlayDirectStream = { url, title ->
-                            val directItem = MediaItem(
-                                id = "direct_${System.currentTimeMillis()}",
-                                title = title.ifBlank { "Direct Stream" },
-                                category = "Direct Stream",
-                                type = MediaType.LIVE_TV,
-                                streamUrl = url,
-                                isLive = true
-                            )
-                            selectedMediaItem = directItem
-                            activePlaybackPlaylist = listOf(directItem)
-                        },
-                        onM3uLoaded = { list ->
-                            m3uList = list
-                            currentTab = AppTab.PLAYLIST
-                        },
-                        onCustomAdded = { item ->
-                            repository.saveCustomStream(item)
-                            customList = repository.getCustomStreams()
-                            coroutineScope.launch {
-                                repository.pushToFirebase(item)
+                // Left Vertical Navigation Rail
+                Surface(
+                    modifier = Modifier
+                        .width(86.dp)
+                        .fillMaxHeight(),
+                    color = Color(0xFF0B1328),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(vertical = 12.dp, horizontal = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        AppTab.values().forEach { tab ->
+                            val isSelected = currentTab == tab
+                            Surface(
+                                shape = RoundedCornerShape(14.dp),
+                                color = if (isSelected) Color(0xFF00E5FF).copy(alpha = 0.16f) else Color.Transparent,
+                                border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.45f)) else null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { currentTab = tab }
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 10.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = when (tab) {
+                                            AppTab.EVENTS -> Icons.Rounded.EmojiEvents
+                                            AppTab.LIVE_TV -> Icons.Rounded.Tv
+                                            AppTab.MOVIES -> Icons.Rounded.Movie
+                                            AppTab.PLAYLIST -> Icons.Rounded.Folder
+                                            AppTab.MENU -> Icons.Rounded.Menu
+                                        },
+                                        contentDescription = tab.englishLabel,
+                                        tint = if (isSelected) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Text(
+                                        text = tab.englishLabel,
+                                        color = if (isSelected) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                        fontSize = 11.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        textAlign = TextAlign.Center,
+                                        maxLines = 1
+                                    )
+                                }
                             }
-                            Toast.makeText(context, "চ্যানেল লাইভ তালিকায় যুক্ত হয়েছে!", Toast.LENGTH_SHORT).show()
-                        },
-                        onResetDefaults = {
-                            repository.resetToDefaults()
-                            sportsList = repository.getInitialSports()
-                            liveTvList = repository.getInitialLiveTv()
-                            moviesList = repository.getInitialMoviesSeries()
-                            customList = emptyList()
-                            m3uList = emptyList()
-                            favoriteIds = emptySet()
-                            Toast.makeText(context, "ডিফল্ট রিসেট সফল হয়েছে!", Toast.LENGTH_SHORT).show()
                         }
-                    )
+                    }
+                }
+
+                // Right Content Area with Top Action Header
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .background(Color(0xFF020617))
+                ) {
+                    // Top Action Bar Header
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF0F172A))
+                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.app_logo),
+                                    contentDescription = "NAFI TV Logo",
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Fit
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                if (currentTab == AppTab.EVENTS) {
+                                    Text(
+                                        text = "Live Events",
+                                        color = Color.White,
+                                        fontSize = 19.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                } else {
+                                    Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = "NAFI TV 24",
+                                                color = Color.White,
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(7.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFFEF4444))
+                                            )
+                                        }
+                                        Text(
+                                            text = currentTab.englishLabel,
+                                            color = Color(0xFF94A3B8),
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Action Quick Controls (Mobile / TV Toggle + Refresh)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Layout Toggle: Mobile Pill
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = if (!isTvMode) Color(0xFF00E5FF).copy(alpha = 0.2f) else Color(0xFF1E293B),
+                                    border = if (!isTvMode) androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)) else null,
+                                    modifier = Modifier.clickable {
+                                        if (isTvMode) {
+                                            isTvMode = false
+                                            Toast.makeText(context, "📱 মোবাইল মোড সক্রিয় হয়েছে (Portrait)", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Smartphone,
+                                            contentDescription = "Mobile Mode",
+                                            tint = if (!isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Mobile",
+                                            color = if (!isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                // Layout Toggle: TV Pill
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = if (isTvMode) Color(0xFF00E5FF).copy(alpha = 0.2f) else Color(0xFF1E293B),
+                                    border = if (isTvMode) androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)) else null,
+                                    modifier = Modifier.clickable {
+                                        if (!isTvMode) {
+                                            isTvMode = true
+                                            Toast.makeText(context, "📺 টিভি মোড সক্রিয় হয়েছে (Landscape & TV Layout)", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Tv,
+                                            contentDescription = "TV Mode",
+                                            tint = if (isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "TV",
+                                            color = if (isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                // Refresh Button
+                                Surface(
+                                    shape = CircleShape,
+                                    color = Color(0xFF1E293B),
+                                    modifier = Modifier.clickable { refreshAllData() }
+                                ) {
+                                    Box(modifier = Modifier.padding(7.dp)) {
+                                        if (isRefreshing) {
+                                            CircularProgressIndicator(
+                                                color = Color(0xFF00E5FF),
+                                                strokeWidth = 2.dp,
+                                                modifier = Modifier.size(15.dp)
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Refresh,
+                                                contentDescription = "Refresh",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(15.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Main Content in TV Mode
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f)
+                    ) {
+                        when (currentTab) {
+                            AppTab.EVENTS -> EventsScreen(
+                                sports = sportsList.distinctBy { it.id },
+                                favoriteIds = favoriteIds,
+                                isTvMode = isTvMode,
+                                onSelectMedia = {
+                                    selectedMediaItem = it
+                                    activePlaybackPlaylist = sportsList.distinctBy { sp -> sp.id }
+                                },
+                                onToggleFavorite = { id ->
+                                    repository.toggleFavorite(id)
+                                    favoriteIds = repository.getFavoriteIds()
+                                }
+                            )
+
+                            AppTab.LIVE_TV -> LiveTvTabScreen(
+                                channels = (liveTvList + customList.filter { it.type == MediaType.LIVE_TV } + m3uList.filter { it.type == MediaType.LIVE_TV }).distinctBy { it.id },
+                                favoriteIds = favoriteIds,
+                                isTvMode = isTvMode,
+                                onSelectMedia = {
+                                    selectedMediaItem = it
+                                    activePlaybackPlaylist = (liveTvList + customList.filter { ch -> ch.type == MediaType.LIVE_TV } + m3uList.filter { ch -> ch.type == MediaType.LIVE_TV }).distinctBy { ch -> ch.id }
+                                },
+                                onToggleFavorite = { id ->
+                                    repository.toggleFavorite(id)
+                                    favoriteIds = repository.getFavoriteIds()
+                                }
+                            )
+
+                            AppTab.MOVIES -> MoviesTabScreen(
+                                movies = (moviesList + customList.filter { it.type == MediaType.MOVIE || it.type == MediaType.SERIES } + m3uList.filter { it.type == MediaType.MOVIE }).distinctBy { it.id },
+                                favoriteIds = favoriteIds,
+                                isTvMode = isTvMode,
+                                onSelectMedia = {
+                                    selectedMediaItem = it
+                                    activePlaybackPlaylist = (moviesList + customList.filter { mv -> mv.type == MediaType.MOVIE || mv.type == MediaType.SERIES } + m3uList.filter { mv -> mv.type == MediaType.MOVIE }).distinctBy { mv -> mv.id }
+                                },
+                                onToggleFavorite = { id ->
+                                    repository.toggleFavorite(id)
+                                    favoriteIds = repository.getFavoriteIds()
+                                }
+                            )
+
+                            AppTab.PLAYLIST -> PlaylistTabScreen(
+                                playlists = playlistsList,
+                                repository = repository,
+                                isTvMode = isTvMode,
+                                onSelectMedia = { item, playlist ->
+                                    selectedMediaItem = item
+                                    activePlaybackPlaylist = playlist
+                                }
+                            )
+
+                            AppTab.MENU -> MenuScreen(
+                                repository = repository,
+                                customList = customList,
+                                onOpenAdminApp = { isAdminViewActive = true },
+                                onCheckForUpdates = { checkForUpdates(isManualCheck = true) },
+                                availableUpdateInfo = availableUpdateInfo,
+                                onPlayDirectStream = { url, title ->
+                                    val directItem = MediaItem(
+                                        id = "direct_${System.currentTimeMillis()}",
+                                        title = title.ifBlank { "Direct Stream" },
+                                        category = "Direct Stream",
+                                        type = MediaType.LIVE_TV,
+                                        streamUrl = url,
+                                        isLive = true
+                                    )
+                                    selectedMediaItem = directItem
+                                    activePlaybackPlaylist = listOf(directItem)
+                                },
+                                onM3uLoaded = { list ->
+                                    m3uList = list
+                                    currentTab = AppTab.PLAYLIST
+                                },
+                                onCustomAdded = { item ->
+                                    repository.saveCustomStream(item)
+                                    customList = repository.getCustomStreams()
+                                    coroutineScope.launch {
+                                        repository.pushToFirebase(item)
+                                    }
+                                    Toast.makeText(context, "চ্যানেল লাইভ তালিকায় যুক্ত হয়েছে!", Toast.LENGTH_SHORT).show()
+                                },
+                                onResetDefaults = {
+                                    repository.resetToDefaults()
+                                    sportsList = repository.getInitialSports()
+                                    liveTvList = repository.getInitialLiveTv()
+                                    moviesList = repository.getInitialMoviesSeries()
+                                    customList = emptyList()
+                                    m3uList = emptyList()
+                                    favoriteIds = emptySet()
+                                    Toast.makeText(context, "ডিফল্ট রিসেট সফল হয়েছে!", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            // MOBILE MODE: Standard Scaffold with Top Bar + Content + Bottom Navigation Bar
+            Scaffold(
+                topBar = {
+                    // Top Action Bar Header
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFF0F172A))
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.app_logo),
+                                    contentDescription = "NAFI TV Logo",
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(10.dp)),
+                                    contentScale = ContentScale.Fit
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                if (currentTab == AppTab.EVENTS) {
+                                    Text(
+                                        text = "Live Events",
+                                        color = Color.White,
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                } else {
+                                    Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = "NAFI TV 24",
+                                                color = Color.White,
+                                                fontSize = 17.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(8.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(0xFFEF4444))
+                                            )
+                                        }
+                                        Text(
+                                            text = currentTab.englishLabel,
+                                            color = Color(0xFF94A3B8),
+                                            fontSize = 11.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Action Quick Controls
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Layout Toggle: Mobile Pill
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = if (!isTvMode) Color(0xFF00E5FF).copy(alpha = 0.2f) else Color(0xFF1E293B),
+                                    border = if (!isTvMode) androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)) else null,
+                                    modifier = Modifier.clickable {
+                                        if (isTvMode) {
+                                            isTvMode = false
+                                            Toast.makeText(context, "📱 মোবাইল মোড সক্রিয় হয়েছে (Portrait)", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Smartphone,
+                                            contentDescription = "Mobile Mode",
+                                            tint = if (!isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "Mobile",
+                                            color = if (!isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                // Layout Toggle: TV Pill
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = if (isTvMode) Color(0xFF00E5FF).copy(alpha = 0.2f) else Color(0xFF1E293B),
+                                    border = if (isTvMode) androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)) else null,
+                                    modifier = Modifier.clickable {
+                                        if (!isTvMode) {
+                                            isTvMode = true
+                                            Toast.makeText(context, "📺 টিভি মোড সক্রিয় হয়েছে (Landscape & TV Layout)", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Tv,
+                                            contentDescription = "TV Mode",
+                                            tint = if (isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = "TV",
+                                            color = if (isTvMode) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                // Refresh Button
+                                Surface(
+                                    shape = CircleShape,
+                                    color = Color(0xFF1E293B),
+                                    modifier = Modifier.clickable { refreshAllData() }
+                                ) {
+                                    Box(modifier = Modifier.padding(8.dp)) {
+                                        if (isRefreshing) {
+                                            CircularProgressIndicator(
+                                                color = Color(0xFF00E5FF),
+                                                strokeWidth = 2.dp,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Refresh,
+                                                contentDescription = "Refresh",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                bottomBar = {
+                    NavigationBar(
+                        containerColor = Color(0xFF0F172A),
+                        contentColor = Color.White
+                    ) {
+                        AppTab.values().forEach { tab ->
+                            val selected = currentTab == tab
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = { currentTab = tab },
+                                icon = {
+                                    Icon(
+                                        imageVector = when (tab) {
+                                            AppTab.EVENTS -> Icons.Rounded.EmojiEvents
+                                            AppTab.LIVE_TV -> Icons.Rounded.Tv
+                                            AppTab.MOVIES -> Icons.Rounded.Movie
+                                            AppTab.PLAYLIST -> Icons.Rounded.Folder
+                                            AppTab.MENU -> Icons.Rounded.Menu
+                                        },
+                                        contentDescription = tab.englishLabel,
+                                        tint = if (selected) Color(0xFF00E5FF) else Color(0xFF94A3B8)
+                                    )
+                                },
+                                label = {
+                                    Text(
+                                        text = tab.englishLabel,
+                                        color = if (selected) Color(0xFF00E5FF) else Color(0xFF94A3B8),
+                                        fontSize = 11.sp,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    indicatorColor = Color(0xFF1E293B)
+                                )
+                            )
+                        }
+                    }
+                },
+                containerColor = Color(0xFF020617)
+            ) { paddingValues ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    when (currentTab) {
+                        AppTab.EVENTS -> EventsScreen(
+                            sports = sportsList.distinctBy { it.id },
+                            favoriteIds = favoriteIds,
+                            isTvMode = isTvMode,
+                            onSelectMedia = {
+                                selectedMediaItem = it
+                                activePlaybackPlaylist = sportsList.distinctBy { sp -> sp.id }
+                            },
+                            onToggleFavorite = { id ->
+                                repository.toggleFavorite(id)
+                                favoriteIds = repository.getFavoriteIds()
+                            }
+                        )
+
+                        AppTab.LIVE_TV -> LiveTvTabScreen(
+                            channels = (liveTvList + customList.filter { it.type == MediaType.LIVE_TV } + m3uList.filter { it.type == MediaType.LIVE_TV }).distinctBy { it.id },
+                            favoriteIds = favoriteIds,
+                            isTvMode = isTvMode,
+                            onSelectMedia = {
+                                selectedMediaItem = it
+                                activePlaybackPlaylist = (liveTvList + customList.filter { ch -> ch.type == MediaType.LIVE_TV } + m3uList.filter { ch -> ch.type == MediaType.LIVE_TV }).distinctBy { ch -> ch.id }
+                            },
+                            onToggleFavorite = { id ->
+                                repository.toggleFavorite(id)
+                                favoriteIds = repository.getFavoriteIds()
+                            }
+                        )
+
+                        AppTab.MOVIES -> MoviesTabScreen(
+                            movies = (moviesList + customList.filter { it.type == MediaType.MOVIE || it.type == MediaType.SERIES } + m3uList.filter { it.type == MediaType.MOVIE }).distinctBy { it.id },
+                            favoriteIds = favoriteIds,
+                            isTvMode = isTvMode,
+                            onSelectMedia = {
+                                selectedMediaItem = it
+                                activePlaybackPlaylist = (moviesList + customList.filter { mv -> mv.type == MediaType.MOVIE || mv.type == MediaType.SERIES } + m3uList.filter { mv -> mv.type == MediaType.MOVIE }).distinctBy { mv -> mv.id }
+                            },
+                            onToggleFavorite = { id ->
+                                repository.toggleFavorite(id)
+                                favoriteIds = repository.getFavoriteIds()
+                            }
+                        )
+
+                        AppTab.PLAYLIST -> PlaylistTabScreen(
+                            playlists = playlistsList,
+                            repository = repository,
+                            isTvMode = isTvMode,
+                            onSelectMedia = { item, playlist ->
+                                selectedMediaItem = item
+                                activePlaybackPlaylist = playlist
+                            }
+                        )
+
+                        AppTab.MENU -> MenuScreen(
+                            repository = repository,
+                            customList = customList,
+                            onOpenAdminApp = { isAdminViewActive = true },
+                            onCheckForUpdates = { checkForUpdates(isManualCheck = true) },
+                            availableUpdateInfo = availableUpdateInfo,
+                            onPlayDirectStream = { url, title ->
+                                val directItem = MediaItem(
+                                    id = "direct_${System.currentTimeMillis()}",
+                                    title = title.ifBlank { "Direct Stream" },
+                                    category = "Direct Stream",
+                                    type = MediaType.LIVE_TV,
+                                    streamUrl = url,
+                                    isLive = true
+                                )
+                                selectedMediaItem = directItem
+                                activePlaybackPlaylist = listOf(directItem)
+                            },
+                            onM3uLoaded = { list ->
+                                m3uList = list
+                                currentTab = AppTab.PLAYLIST
+                            },
+                            onCustomAdded = { item ->
+                                repository.saveCustomStream(item)
+                                customList = repository.getCustomStreams()
+                                coroutineScope.launch {
+                                    repository.pushToFirebase(item)
+                                }
+                                Toast.makeText(context, "চ্যানেল লাইভ তালিকায় যুক্ত হয়েছে!", Toast.LENGTH_SHORT).show()
+                            },
+                            onResetDefaults = {
+                                repository.resetToDefaults()
+                                sportsList = repository.getInitialSports()
+                                liveTvList = repository.getInitialLiveTv()
+                                moviesList = repository.getInitialMoviesSeries()
+                                customList = emptyList()
+                                m3uList = emptyList()
+                                favoriteIds = emptySet()
+                                Toast.makeText(context, "ডিফল্ট রিসেট সফল হয়েছে!", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -5133,23 +5463,16 @@ fun EventsScreen(
     onSelectMedia: (MediaItem) -> Unit,
     onToggleFavorite: (String) -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf("All") }
-    var selectedStatus by remember { mutableStateOf("All") }
+    var selectedCategory by remember { mutableStateOf("Cricket") }
+    var selectedStatus by remember { mutableStateOf("🔴 Live") }
 
     // Dynamic categories extracted from all sports matches
     val categories = remember(sports) {
-        val cats = mutableListOf("All")
+        val defaultCats = listOf("Cricket", "Football", "Hockey", "More", "All")
         val uniqueCats = sports.map { it.category.trim() }.filter { it.isNotBlank() && !it.equals("All", ignoreCase = true) }.distinct()
-        cats.addAll(uniqueCats)
-        if (!cats.contains("Cricket") && sports.any { it.title.contains("Cricket", ignoreCase = true) || it.tournament?.contains("Cricket", ignoreCase = true) == true }) {
-            cats.add("Cricket")
-        }
-        if (!cats.contains("Football") && sports.any { it.title.contains("Football", ignoreCase = true) || it.tournament?.contains("Football", ignoreCase = true) == true }) {
-            cats.add("Football")
-        }
-        cats.distinct()
+        (defaultCats + uniqueCats).distinct()
     }
-    val statusFilters = listOf("All", "🔴 Live", "⏳ Upcoming")
+    val statusFilters = listOf("🔴 Live", "Upcoming", "Today", "Recent Results", "All")
 
     // Live ticking countdown state
     var tickCount by remember { mutableStateOf(0L) }
@@ -5166,12 +5489,16 @@ fun EventsScreen(
             "All" -> true
             "Cricket" -> item.category.contains("Cricket", ignoreCase = true) || item.tournament?.contains("Cricket", ignoreCase = true) == true || item.title.contains("Cricket", ignoreCase = true)
             "Football" -> item.category.contains("Football", ignoreCase = true) || item.tournament?.contains("Football", ignoreCase = true) == true || item.title.contains("Football", ignoreCase = true)
+            "Hockey" -> item.category.contains("Hockey", ignoreCase = true) || item.tournament?.contains("Hockey", ignoreCase = true) == true || item.title.contains("Hockey", ignoreCase = true)
+            "More" -> !item.category.contains("Cricket", ignoreCase = true) && !item.category.contains("Football", ignoreCase = true)
             else -> item.category.contains(selectedCategory, ignoreCase = true) || item.tournament?.contains(selectedCategory, ignoreCase = true) == true || item.title.contains(selectedCategory, ignoreCase = true)
         }
         val statusMatches = when (selectedStatus) {
             "All" -> true
             "🔴 Live" -> isLive
-            "⏳ Upcoming" -> !isLive
+            "Upcoming" -> !isLive
+            "Today" -> true
+            "Recent Results" -> !isLive
             else -> true
         }
         catMatches && statusMatches
@@ -5185,7 +5512,7 @@ fun EventsScreen(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // -------------------------------------------------------------
-        // FILTER ROW 1: SPORTS CATEGORIES (All, Cricket, Football)
+        // FILTER ROW 1: SPORTS CATEGORIES (Cricket, Football, Hockey, More)
         // -------------------------------------------------------------
         item {
             LazyRow(
@@ -5195,16 +5522,16 @@ fun EventsScreen(
                 items(categories) { cat ->
                     val isSelected = selectedCategory == cat
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) Color(0xFF1E3A8A) else Color(0xFF1E293B),
-                        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF3B82F6)) else null,
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (isSelected) Color(0xFF00E5FF) else Color(0xFF1E293B),
+                        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155).copy(alpha = 0.5f)),
                         modifier = Modifier.clickable { selectedCategory = cat }
                     ) {
                         Text(
                             text = cat,
-                            color = if (isSelected) Color.White else Color(0xFF94A3B8),
+                            color = if (isSelected) Color(0xFF020617) else Color(0xFF94A3B8),
                             fontSize = 13.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             modifier = Modifier.padding(horizontal = 18.dp, vertical = 7.dp)
                         )
                     }
@@ -5213,7 +5540,7 @@ fun EventsScreen(
         }
 
         // -------------------------------------------------------------
-        // FILTER ROW 2: STATUS FILTERS (All, 🔴 Live, ⏳ Upcoming)
+        // FILTER ROW 2: STATUS FILTERS (🔴 Live, Upcoming, Today, Recent Results)
         // -------------------------------------------------------------
         item {
             LazyRow(
@@ -5223,16 +5550,16 @@ fun EventsScreen(
                 items(statusFilters) { status ->
                     val isSelected = selectedStatus == status
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) Color(0xFF1E3A8A) else Color(0xFF1E293B),
-                        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF3B82F6)) else null,
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (isSelected) Color(0xFF00E5FF) else Color(0xFF1E293B),
+                        border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF334155).copy(alpha = 0.5f)),
                         modifier = Modifier.clickable { selectedStatus = status }
                     ) {
                         Text(
                             text = status,
-                            color = if (isSelected) Color.White else Color(0xFF94A3B8),
+                            color = if (isSelected) Color(0xFF020617) else if (status == "🔴 Live") Color(0xFFEF4444) else if (status == "Upcoming") Color(0xFFFBBF24) else Color(0xFF94A3B8),
                             fontSize = 13.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 7.dp)
                         )
                     }
