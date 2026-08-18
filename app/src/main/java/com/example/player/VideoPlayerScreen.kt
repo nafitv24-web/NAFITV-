@@ -278,8 +278,8 @@ fun VideoPlayerScreen(
 
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(25000)
-            .setReadTimeoutMs(35000)
+            .setConnectTimeoutMs(8000)
+            .setReadTimeoutMs(12000)
             .setUserAgent(finalUserAgent)
             .setDefaultRequestProperties(requestHeaders)
 
@@ -303,7 +303,7 @@ fun VideoPlayerScreen(
         }
 
         val renderersFactory = androidx.media3.exoplayer.DefaultRenderersFactory(context)
-            .setExtensionRendererMode(androidx.media3.exoplayer.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+            .setExtensionRendererMode(androidx.media3.exoplayer.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
             .setEnableDecoderFallback(true)
 
         val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context).apply {
@@ -318,12 +318,13 @@ fun VideoPlayerScreen(
 
         val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                /* minBufferMs = */ 2500,
-                /* maxBufferMs = */ 15000,
-                /* bufferForPlaybackMs = */ 250,
-                /* bufferForPlaybackAfterRebufferMs = */ 600
+                /* minBufferMs = */ 1000,
+                /* maxBufferMs = */ 6000,
+                /* bufferForPlaybackMs = */ 50,
+                /* bufferForPlaybackAfterRebufferMs = */ 200
             )
             .setPrioritizeTimeOverSizeThresholds(true)
+            .setBackBuffer(1000, false)
             .build()
 
         ExoPlayer.Builder(context, renderersFactory)
@@ -336,6 +337,13 @@ fun VideoPlayerScreen(
             .build().apply {
                 val mediaItemBuilder = MediaItem.Builder()
                     .setUri(finalCleanUrl)
+                    .setLiveConfiguration(
+                        androidx.media3.common.MediaItem.LiveConfiguration.Builder()
+                            .setMaxPlaybackSpeed(1.02f)
+                            .setMinPlaybackSpeed(0.98f)
+                            .setTargetOffsetMs(500)
+                            .build()
+                    )
 
                 if (drmConfig != null) {
                     val drmConfigBuilder = MediaItem.DrmConfiguration.Builder(drmConfig.schemeUuid)

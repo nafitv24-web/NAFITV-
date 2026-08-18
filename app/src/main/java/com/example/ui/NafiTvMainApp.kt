@@ -294,7 +294,9 @@ fun NafiTvMainApp() {
                 Surface(
                     modifier = Modifier
                         .width(86.dp)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .statusBarsPadding()
+                        .navigationBarsPadding(),
                     color = Color(0xFF0B1328),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF1E293B))
                 ) {
@@ -353,6 +355,7 @@ fun NafiTvMainApp() {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .navigationBarsPadding()
                         .background(Color(0xFF020617))
                 ) {
                     // Top Action Bar Header
@@ -360,6 +363,7 @@ fun NafiTvMainApp() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color(0xFF0F172A))
+                            .statusBarsPadding()
                             .padding(horizontal = 16.dp, vertical = 10.dp)
                     ) {
                         Row(
@@ -619,7 +623,8 @@ fun NafiTvMainApp() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color(0xFF0F172A))
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .statusBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 10.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1176,6 +1181,7 @@ fun AdminControlAppScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF0F172A))
+                .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Row(
